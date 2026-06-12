@@ -69,6 +69,28 @@
     text-shadow:-1.5px -1.5px 0 #0a1a44,1.5px -1.5px 0 #0a1a44,-1.5px 1.5px 0 #0a1a44,1.5px 1.5px 0 #0a1a44,0 0 14px rgba(90,176,255,0.7);}
   #ov-start .btn{margin:11px 0 5px;}
   #ov-start .ov-sub{margin-top:2px;}
+  /* intro / mission briefing screen */
+  #ov-intro{background:radial-gradient(ellipse at 50% 30%,#16203a 0%,#0a0c14 70%,#06070c 100%);
+    padding:20px;}
+  .intro-card{width:100%;max-width:400px;border:1px solid #2a3a5a;
+    background:linear-gradient(180deg,rgba(20,30,54,0.85),rgba(8,10,18,0.92));
+    box-shadow:0 0 0 3px #0a0c14,0 0 0 5px #2e7ad6,0 0 30px rgba(46,122,214,0.25);
+    padding:18px 18px 20px;text-align:left;}
+  .intro-eyebrow{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.28em;
+    color:#5ab0ff;text-align:center;margin-bottom:14px;
+    text-shadow:0 0 10px rgba(90,176,255,0.5);}
+  .intro-body{display:flex;flex-direction:column;gap:9px;}
+  .intro-body p{font-family:'Share Tech Mono',monospace;font-size:13px;line-height:1.55;
+    color:#cdd8ea;letter-spacing:.01em;margin:0;}
+  .intro-body b{color:#8fd0ff;}
+  .intro-punch{color:#ffd34d !important;font-size:14px !important;letter-spacing:.04em;
+    text-shadow:0 0 12px rgba(255,170,40,0.4);margin-top:3px !important;}
+  .intro-controls{display:flex;flex-direction:column;gap:3px;margin:15px 0 4px;
+    padding:10px 12px;border:1px solid #2a3a5a;background:rgba(10,14,24,0.6);}
+  .intro-controls span{font-family:'Share Tech Mono',monospace;font-size:11px;
+    color:#8aa0c4;letter-spacing:.04em;}
+  .intro-controls b{color:#e8d6bc;display:inline-block;min-width:54px;}
+  #ov-intro .btn{display:block;margin:16px auto 0;}
   .ov-title{font-family:'VT323',monospace;font-size:clamp(30px,9vw,52px);color:var(--accent);
     line-height:.92;text-shadow:0 0 16px #c8822e55;}
   .ov-sub{font-size:12px;color:var(--muted);max-width:310px;line-height:1.7;letter-spacing:.02em;}
@@ -142,6 +164,23 @@
           <button class="btn" id="btn-start">PRESS START</button>
           <div class="ov-sub" style="font-size:10px;opacity:.7;max-width:none">Left pad moves &middot; BIND fires the drug in the way you face</div>
         </div>
+      </div>
+    </div>
+    <div class="overlay hidden" id="ov-intro">
+      <div class="intro-card">
+        <div class="intro-eyebrow">MISSION BRIEFING</div>
+        <div class="intro-body">
+          <p>You are <b>Captain Kris-Drug Conjugate</b>, ace pilot of an <b>antibody craft</b> forged in the marrow of the immune fleet.</p>
+          <p>Bolted to its Fc nose: a <b>bespoke small-molecule drug lance</b>, tuned to one purpose.</p>
+          <p>Across the EGFR-stained tissue lurks the <b>noob tumor</b> &mdash; bloated, dividing, and overdue for a lesson.</p>
+          <p class="intro-punch">Get in. Lance up. Own the noob tumor.</p>
+        </div>
+        <div class="intro-controls">
+          <span><b>MOVE</b> left pad / WASD</span>
+          <span><b>LANCE</b> BIND / Space</span>
+          <span><b>GUARD</b> Fc shield / Shift</span>
+        </div>
+        <button class="btn" id="btn-deploy">DEPLOY</button>
       </div>
     </div>
     <div class="overlay hidden" id="ov-dead">
@@ -1204,7 +1243,14 @@ if(avatarReady) ensureTitlePainted();
 else { avatarImg.addEventListener('load',ensureTitlePainted); ensureTitlePainted(); }
 
 function loop(){if(state==='play'){update();draw();}requestAnimationFrame(loop);}
-document.getElementById('btn-start').onclick=()=>{document.getElementById('ov-start').classList.add('hidden');init();};
+document.getElementById('btn-start').onclick=()=>{
+  document.getElementById('ov-start').classList.add('hidden');
+  document.getElementById('ov-intro').classList.remove('hidden');
+};
+document.getElementById('btn-deploy').onclick=()=>{
+  document.getElementById('ov-intro').classList.add('hidden');
+  init();
+};
 document.getElementById('btn-restart').onclick=()=>{document.getElementById('ov-dead').classList.add('hidden');init();};
 document.getElementById('btn-win-restart').onclick=()=>{document.getElementById('ov-win').classList.add('hidden');init();};
 document.addEventListener('keydown',e=>{if(e.code==='KeyR'&&state==='dead'){
