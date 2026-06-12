@@ -36,33 +36,39 @@
     justify-content:center;background:rgba(16,10,6,.93);gap:15px;padding:26px 24px;text-align:center;z-index:5;}
   .overlay.hidden{display:none;}
   /* pixel-art title screen — NES cover-art look */
-  #ov-start{gap:0;justify-content:flex-start;padding:0;overflow-y:auto;
-    background:#000;}
-  .nes-cover{width:100%;max-width:420px;margin:0 auto;display:flex;flex-direction:column;
+  #ov-start{gap:0;justify-content:center;align-items:center;padding:8px;
+    background:#000;overflow:hidden;}
+  .nes-cover{width:100%;max-width:400px;max-height:100%;margin:0 auto;
+    display:flex;flex-direction:column;
     border:none;background:
       repeating-linear-gradient(45deg,#1a1410 0 6px,#221813 6px 12px);
     box-shadow:0 0 0 4px #c8822e,0 0 0 8px #1a1410,0 0 30px rgba(0,0,0,0.8);
-    padding:7px;}
+    padding:6px;}
   /* top label strip like a publisher banner */
-  .nes-strip{display:flex;justify-content:space-between;align-items:center;
+  .nes-strip{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
     background:#c8822e;color:#1a1410;font-family:'Share Tech Mono',monospace;
     font-size:9px;letter-spacing:.12em;padding:3px 8px;font-weight:bold;}
-  #title-art{width:100%;height:auto;display:block;
-    image-rendering:pixelated;background:#05060c;border:3px solid #1a1410;border-top:none;}
-  .title-plate{background:#0a0c14;border:3px solid #1a1410;border-top:none;
-    padding:12px 10px 14px;text-align:center;}
-  .title-main{font-family:'VT323',monospace;font-size:clamp(28px,8.5vw,46px);
+  /* art shows in full (no clipping) inside a capped frame */
+  .art-frame{flex:0 1 auto;min-height:0;overflow:hidden;
+    border:3px solid #1a1410;border-top:none;background:#05060c;
+    max-height:40vh;}
+  #title-art{width:100%;height:100%;display:block;object-fit:contain;
+    image-rendering:pixelated;}
+  .title-plate{flex:0 0 auto;background:#0a0c14;border:3px solid #1a1410;border-top:none;
+    padding:10px 10px 12px;text-align:center;}
+  .title-main{font-family:'VT323',monospace;font-size:clamp(26px,7.5vw,42px);
     color:#ffd34d;line-height:.82;letter-spacing:.01em;
     text-shadow:
       -2px -2px 0 #7a1e0e, 2px -2px 0 #7a1e0e, -2px 2px 0 #7a1e0e, 2px 2px 0 #7a1e0e,
       0 4px 0 #5a1408, 0 0 18px rgba(255,170,40,0.5);}
-  .title-sub{font-family:'VT323',monospace;font-size:clamp(13px,4vw,19px);
-    color:#dfe8ff;line-height:1;letter-spacing:.08em;margin-top:9px;
+  .title-sub{font-family:'VT323',monospace;font-size:clamp(13px,4vw,18px);
+    color:#dfe8ff;line-height:1;letter-spacing:.08em;margin-top:7px;
     text-shadow:-1px -1px 0 #0a1a44,1px -1px 0 #0a1a44,-1px 1px 0 #0a1a44,1px 1px 0 #0a1a44;}
   .title-sub-name{display:inline-block;margin-top:3px;
     color:#5ab0ff;letter-spacing:.05em;
     text-shadow:-1.5px -1.5px 0 #0a1a44,1.5px -1.5px 0 #0a1a44,-1.5px 1.5px 0 #0a1a44,1.5px 1.5px 0 #0a1a44,0 0 14px rgba(90,176,255,0.7);}
-  #ov-start .btn{margin:14px 0 6px;}
+  #ov-start .btn{margin:11px 0 5px;}
+  #ov-start .ov-sub{margin-top:2px;}
   .ov-title{font-family:'VT323',monospace;font-size:clamp(30px,9vw,52px);color:var(--accent);
     line-height:.92;text-shadow:0 0 16px #c8822e55;}
   .ov-sub{font-size:12px;color:var(--muted);max-width:310px;line-height:1.7;letter-spacing:.02em;}
@@ -129,7 +135,7 @@
     <div class="overlay" id="ov-start">
       <div class="nes-cover">
         <div class="nes-strip"><span>RKS ENTERTAINMENT SYSTEM</span><span>1 PLAYER</span></div>
-        <canvas id="title-art" width="256" height="208"></canvas>
+        <div class="art-frame"><canvas id="title-art" width="256" height="208"></canvas></div>
         <div class="title-plate">
           <div class="title-main">QUANTITATIVE<br>CONTINUOUS PWNING</div>
           <div class="title-sub">The Legend of<br><span class="title-sub-name">KRIS-DRUG CONJUGATE</span></div>
@@ -1007,11 +1013,11 @@ function paintTitle(){
   // Ship is at (96,150), banked by ROT, scaled by SH. Its nose emitter is at
   // local (0, noseY-4) ~= (0,-21). Transform that to world space so the lance
   // emerges exactly from the tip.
-  const shipX=96, shipY=150, SH=1.7, ROT=0.942;  // ship aims its nose at the cluster
+  const shipX=92, shipY=134, SH=1.7, ROT=0.942;  // ship aims its nose at the cluster
   const noseLocalY=-21;                         // nose emitter tip (local)
   const sx0=shipX + (-Math.sin(ROT))*noseLocalY*SH;   // rotate (0,noseLocalY)
   const sy0=shipY + ( Math.cos(ROT))*noseLocalY*SH;
-  const sx1=206, sy1=70;            // impact point in the cluster
+  const sx1=206, sy1=66;            // impact point in the cluster
   drawCoverLance(sx0,sy0,sx1,sy1,R);
   // impact flash
   const fl=tctx.createRadialGradient(sx1,sy1,2,sx1,sy1,34);
@@ -1019,7 +1025,6 @@ function paintTitle(){
   fl.addColorStop(0.3,'rgba(180,255,255,0.6)');
   fl.addColorStop(1,'rgba(120,210,255,0)');
   tctx.fillStyle=fl;tctx.fillRect(sx1-34,sy1-34,68,68);
-  // flying debris (brown shards + blue nuclei bursting outward)
   for(let i=0;i<26;i++){
     const a=R()*6.28, d=6+R()*30;
     const px=sx1+Math.cos(a)*d, py=sy1+Math.sin(a)*d;
@@ -1028,7 +1033,7 @@ function paintTitle(){
   }
 
   // ── 5. HERO ANTIBODY-SHIP (foreground, large, banking up-right) ──
-  drawCoverShip(96,150, R);
+  drawCoverShip(92,134, R);
 
   // ── 6. finishing: vignette + scanlines + CRT corners ──
   const vg=tctx.createRadialGradient(TWd/2,THt/2,40,TWd/2,THt/2,160);
