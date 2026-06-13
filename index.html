@@ -69,6 +69,40 @@
     text-shadow:-1.5px -1.5px 0 #0a1a44,1.5px -1.5px 0 #0a1a44,-1.5px 1.5px 0 #0a1a44,1.5px 1.5px 0 #0a1a44,0 0 14px rgba(90,176,255,0.7);}
   #ov-start .btn{margin:11px 0 5px;}
   #ov-start .ov-sub{margin-top:2px;}
+  /* passcode gate / landing */
+  #ov-gate{background:
+      radial-gradient(ellipse at 50% 28%,#241038 0%,#120a22 55%,#0a0610 100%);
+    padding:22px;}
+  .gate-card{width:100%;max-width:380px;text-align:center;
+    border:1px solid #3a2a5a;
+    background:linear-gradient(180deg,rgba(28,18,44,0.9),rgba(10,8,18,0.94));
+    box-shadow:0 0 0 3px #0a0610,0 0 0 5px #c8822e,0 0 28px rgba(200,130,46,0.25);
+    padding:20px 20px 18px;}
+  .gate-logo{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.3em;
+    color:#c8822e;margin-bottom:6px;}
+  .gate-title{font-family:'VT323',monospace;font-size:clamp(30px,9vw,44px);color:#ffd34d;
+    line-height:.9;letter-spacing:.04em;
+    text-shadow:-2px -2px 0 #7a1e0e,2px -2px 0 #7a1e0e,-2px 2px 0 #7a1e0e,2px 2px 0 #7a1e0e,0 0 16px rgba(255,170,40,0.45);}
+  .gate-blurb{font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.55;
+    color:#cdbfe0;margin:12px 4px 0;letter-spacing:.01em;}
+  .gate-blurb b{color:#e8b04a;}
+  .gate-prompt{font-family:'Share Tech Mono',monospace;font-size:12px;color:#8fd0ff;
+    margin:14px 0 7px;letter-spacing:.03em;}
+  .gate-input{width:100%;max-width:220px;text-align:center;
+    font-family:'VT323',monospace;font-size:30px;letter-spacing:.35em;
+    color:#ffd34d;background:#0a0610;border:2px solid #5a3a7a;border-radius:3px;
+    padding:6px 8px;outline:none;text-transform:lowercase;
+    box-shadow:inset 0 0 12px rgba(0,0,0,0.6);caret-color:#ffd34d;}
+  .gate-input:focus{border-color:#c8822e;box-shadow:inset 0 0 12px rgba(0,0,0,0.6),0 0 12px rgba(200,130,46,0.35);}
+  .gate-input.bad{border-color:#d24a2a;animation:gateShake .35s;}
+  @keyframes gateShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+  #ov-gate .btn{margin:14px auto 0;display:block;}
+  .gate-msg{font-family:'Share Tech Mono',monospace;font-size:11px;line-height:1.5;
+    color:#9a7ab0;margin-top:11px;min-height:30px;letter-spacing:.02em;}
+  .gate-msg.err{color:#ff6a4a;}
+  .gate-msg.ok{color:#4dffb4;}
+  .gate-foot{font-family:'Share Tech Mono',monospace;font-size:8.5px;letter-spacing:.06em;
+    color:#5a4670;margin-top:12px;line-height:1.5;}
   /* intro / mission briefing screen */
   #ov-intro{background:radial-gradient(ellipse at 50% 30%,#16203a 0%,#0a0c14 70%,#06070c 100%);
     padding:20px;}
@@ -154,7 +188,21 @@
     <canvas id="game" width="480" height="448"></canvas>
     <div class="screen-tag" id="screen-tag">FIELD 1</div>
     <div class="kbd-note">WASD / arrows &middot; SPACE attack &middot; SHIFT shield</div>
-    <div class="overlay" id="ov-start">
+    <div class="overlay" id="ov-gate">
+      <div class="gate-card">
+        <div class="gate-logo">RKS&nbsp;DIAGNOSTICS</div>
+        <div class="gate-title">SLIDE&nbsp;CHECK-IN</div>
+        <div class="gate-blurb">This specimen is <b>access-restricted</b>. Only conjugates with the correct epitope may bind.</div>
+        <div class="gate-prompt">Enter passcode to stain &amp; enter:</div>
+        <input id="gate-input" class="gate-input" type="text" inputmode="text"
+          autocomplete="off" autocapitalize="off" spellcheck="false"
+          maxlength="16" placeholder="• • •" aria-label="passcode" />
+        <button class="btn" id="btn-gate">VALIDATE EPITOPE</button>
+        <div class="gate-msg" id="gate-msg"></div>
+        <div class="gate-foot">For Research Use Only &middot; Not for diagnostic procedures &middot; Pwning may occur</div>
+      </div>
+    </div>
+    <div class="overlay hidden" id="ov-start">
       <div class="nes-cover">
         <div class="nes-strip"><span>RKS ENTERTAINMENT SYSTEM</span><span>1 PLAYER</span></div>
         <div class="art-frame"><canvas id="title-art" width="256" height="208"></canvas></div>
@@ -1243,6 +1291,51 @@ if(avatarReady) ensureTitlePainted();
 else { avatarImg.addEventListener('load',ensureTitlePainted); ensureTitlePainted(); }
 
 function loop(){if(state==='play'){update();draw();}requestAnimationFrame(loop);}
+
+// ── PASSCODE GATE ──
+(function(){
+  const PASS='qcp';
+  const gate=document.getElementById('ov-gate');
+  const input=document.getElementById('gate-input');
+  const msg=document.getElementById('gate-msg');
+  const btn=document.getElementById('btn-gate');
+  // punny rejections for wrong epitopes
+  const wrongs=[
+    "Non-specific binding. Wash buffer and try again.",
+    "High background — that epitope won't stain. Retry.",
+    "Negative control detected. Need the real antigen.",
+    "Off-target. Your conjugate just no-showed the assay.",
+    "Blocked. (And not the good kind with BSA.)",
+    "Faint signal, no specificity. Re-titrate that code.",
+    "That's an isotype mismatch, captain. Try again."
+  ];
+  let attempts=0;
+  function reveal(){
+    msg.textContent="Epitope confirmed. Crisp membranous 3+ staining. Welcome aboard.";
+    msg.className='gate-msg ok';
+    input.classList.remove('bad');
+    setTimeout(()=>{
+      gate.classList.add('hidden');
+      document.getElementById('ov-start').classList.remove('hidden');
+    },650);
+  }
+  function reject(){
+    attempts++;
+    input.classList.remove('bad');void input.offsetWidth;input.classList.add('bad');
+    msg.textContent=wrongs[(attempts-1)%wrongs.length];
+    msg.className='gate-msg err';
+    input.select();
+  }
+  function submit(){
+    const v=(input.value||'').trim().toLowerCase();
+    if(v===PASS) reveal(); else reject();
+  }
+  btn.onclick=submit;
+  input.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();submit();} });
+  // focus the field on load (desktop); mobile users tap it
+  setTimeout(()=>{ try{input.focus();}catch(_){}} ,300);
+})();
+
 document.getElementById('btn-start').onclick=()=>{
   document.getElementById('ov-start').classList.add('hidden');
   document.getElementById('ov-intro').classList.remove('hidden');
